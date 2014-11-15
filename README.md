@@ -24,3 +24,9 @@ Use [TMDB](https://www.themoviedb.org/)'s [API](https://www.themoviedb.org/docum
 	mongod --dbpath=data --port 27017
 	```
 * In another terminal window at the root of the repo, start the web serving application.
+
+	```bash
+	node app.js
+	```
+
+Now what? [Download movie data from the API](http://localhost:3000/updatemovies), or [view the data you've already downloaded](http://localhost:3000/). More soon.
