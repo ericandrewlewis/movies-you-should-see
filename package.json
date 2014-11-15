@@ -1,0 +1,29 @@
+{
+  "name": "movies-you-should-see",
+  "version": "0.1.0",
+  "description": "Get upcoming movies based on your likes.",
+  "main": "index.js",
+  "dependencies": {
+    "express": "~4.10.2",
+    "mongodb": "~1.4.20",
+    "lodash": "~2.4.1",
+    "sprintf": "~0.1.4",
+    "backbone": "~1.1.2",
+    "backbone.marionette": "~2.2.2",
+    "jquery": "~2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ericandrewlewis/movies-you-should-see.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ericandrewlewis/movies-you-should-see/issues"
+  },
+  "homepage": "https://github.com/ericandrewlewis/movies-you-should-see"
+}
