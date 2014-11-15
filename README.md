@@ -10,17 +10,17 @@ Use [TMDB](https://www.themoviedb.org/)'s [API](https://www.themoviedb.org/docum
 * In a terminal window at the root of the repo, install all node dependencies.
 
 	```bash
-	$ npm install
+	npm install
 	```
 * Install MongoDB.
 
 	```bash
 	brew install mongodb
 	```
-* Create a folder called `data` inside the repo's folder. Mongodb data will be stored there.
+* Create a folder called `data` at the root of the repo. Mongodb data will be stored there.
 * In a terminal window at the root of the repo, start the mongodb daemon.
 
 	```bash
-	$ mongod --dbpath=data --port 27017
+	mongod --dbpath=data --port 27017
 	```
 * In another terminal window at the root of the repo, start the web serving application.
