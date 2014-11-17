@@ -1,0 +1,64 @@
+body {
+    font-family: Raleway;
+    color: #415160;
+}
+
+.movie-text {
+   color: #40C0CB;
+}
+
+h1 {
+    font-size: 51px;
+}
+
+h1,
+h2,
+h3 {
+    text-align: center;
+}
+
+.movie-list {
+   border-left: 1px solid #415160;
+   clear: both;
+}
+
+.movie-list:before,
+.movie-list:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.movie-list:after {
+    clear: both;
+}
+
+.movie-container {
+    width: 400px;
+    height: 300px;
+    border-bottom: 1px solid #415160;
+    border-right: 1px solid #415160;
+    float: left;
+    text-align: center;
+}
+
+.movie-container:hover {
+    background-color: #40C0CB;
+}
+
+.movie-worth {
+    font-size: 1.2em;
+}
+
+.green {
+    color: #8BAB5F;
+    background-color: white;
+}
+
+.red {
+    color: #F05C54;
+    background-color: white;
+}
+
+img {
+    border: 3px solid #CCC;
+}
