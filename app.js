@@ -79,9 +79,11 @@ var updateUpcomingMoviesFromAPI = function (options) {
 var getMovies = function () {
 	var collection = application.get( 'db' ).collection('movies');
 	return collection.find({});
-}
+};
 
 var application = new Backbone.Model();
+
+app.use( '/application', express.static( './application' ) );
 
 /**
  * Primary endpoint; lists movies.
