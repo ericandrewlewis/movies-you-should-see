@@ -1,19 +1,7 @@
 mashApp.models.Movie = Backbone.Model.extend();
 
 mashApp.models.MovieWatcher = Backbone.Model.extend({
-    // promptMovieTime: function() {
-    //   var movieTime = prompt("Enter (in minutes) the longest amount of time you would sit for a movie:");
-    //   this.set({timeLimit: movieTime});
-    // },
-    // promptFavoriteActors: function() {
-    //   var actorString = prompt("Enter a comma separated list(no spaces after ,) of actors you would see in any movie they made.");
-    //   var actors = actorString.split(",");
-    //   this.set({actors: actors});
-    // },
-    // promptViewerRatingPreference: function() {
-    //   var viewerRating = prompt("Enter the minimum viewer rating (out of 100) a movie must receive for you to see it:");
-    //   this.set({viewerRatingLimit: viewerRating});
-    // }
+    //timeLimit, viewerRatingLimit
 });
 
 mashApp.collections.MovieList = Backbone.Collection.extend({
@@ -34,7 +22,7 @@ mashApp.views.FormView = Backbone.View.extend({
 
     tagName: 'form',
     className: 'watcher-form',
-    template: _.template('<label for="movie-length">Length of longest movie you would sit through: </label><input type="text" name="movie-length"/><input type="checkbox" name="actors" value="Ben Affleck"/>Ben Affleck<input type="checkbox" name="actors" value="Neil Patrick Harris"/>Neil Patrick Harris<button type="button" class="submit-button" name="submit">Submit!</button>'),
+    template: _.template('<label for="movie-length">Length of longest movie you would sit through: </label><input type="text" name="movie-length"/><label for="movie-rating">Rating of lowest rated movie you would sit through: </label><input type="text" name="movie-rating"/><button type="button" class="submit-button" name="submit">Submit!</button>'),
     events: {
         'click .submit-button': 'handleSubmit',
         'submit': 'handleSubmit'
@@ -56,8 +44,6 @@ mashApp.views.FormView = Backbone.View.extend({
 
 
 
-
-
 mashApp.views.MovieListView =
      Backbone.View.extend({
         tagName: 'div',
@@ -71,22 +57,6 @@ mashApp.views.MovieListView =
         }
 
  }); // end MovieListView
-
-//
-//  // movieWatcher.promptMovieTime();
-//  // movieWatcher.promptViewerRatingPreference();
-//  // movieWatcher.promptFavoriteActors();
-//  var list = new mashApp.views.MovieListView();
-//   list.render();
-
-//   //google.load('search', '1');
-// var movieList = new mashApp.collections.MovieList();
-// movieList.fetch();
-// movieList.on('add', function(movie){
-//   var model = new Backbone.Model();
-//   model.set({movie: movie, watcher: movieWatcher});
-//   var movieView = new mashApp.views.MovieView({model: model});
-// });
 
 
 // controller
@@ -107,14 +77,20 @@ mashApp.models.Controller = Backbone.Model.extend({
      */
     sendInfoToModel: function() {
         this.movieWatcher.set({timeLimit: $('input[name="movie-length"]').val()});
-        var actorsList = '';
-        $('input[name="actors"]').each(function(index) {
-                actorList
+        this.movieWatcher.set({viewerRatingLimit: $('input[name="movie-rating"]').val()});
+        this.createMovieList();
+    },
+
+    createMovieList: function() {
+        this.list = new mashApp.views.MovieListView();
+        this.movieList = new mashApp.collections.MovieList();
+        this.movieList.fetch();
+        var self = this;
+        this.movieList.on('add', function(movie){
+          this.model = new Backbone.Model();
+          this.model.set({movie: movie, watcher: self.movieWatcher});
+          this.movieView = new mashApp.views.MovieView({model: this.model});
         });
-        console.log($('input[name="actors"]').val());
-        //this.set({actors: $('input[name*="actors"]').val()});
-        console.log(this.movieWatcher.get('timeLimit'));
-        //console.log(this.movieWatcher.get('actors'));
     }
 });
 
