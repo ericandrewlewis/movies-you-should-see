@@ -1,9 +1,12 @@
 Movies You Should See
 =====================
 
-Go to movies that you'd be into.
+Get a list of movies in theaters that you'd be into, based on your preferences.
 
-Use [TMDB](https://www.themoviedb.org/)'s [API](https://www.themoviedb.org/documentation/api), we retrieve a list of the [upcoming movies](http://docs.themoviedb.apiary.io/reference/movies/movieupcoming/get) combined with [movie credits](http://docs.themoviedb.apiary.io/reference/movies/movieidcredits/get), and store it all in a mongodb instance.
+Use [TMDB](https://www.themoviedb.org/)'s [API](https://www.themoviedb.org/documentation/api),
+we retrieve a list of the [upcoming movies](http://docs.themoviedb.apiary.io/reference/movies/movieupcoming/get)
+combined with [movie credits](http://docs.themoviedb.apiary.io/reference/movies/movieidcredits/get),
+and store it all in a mongodb instance.
 
 ### Installation
 
@@ -29,4 +32,8 @@ Use [TMDB](https://www.themoviedb.org/)'s [API](https://www.themoviedb.org/docum
 	node app.js
 	```
 
-Now what? [Download movie data from the API](http://localhost:3000/updatemovies), or [view the data you've already downloaded](http://localhost:3000/). More soon.
+Now you have a few endpoints available in your browser.
+
+* [http://localhost:3000/updatemovies](http://localhost:3000/updatemovies) Download generic movie data from the API.
+* [http://localhost:3000/updatemoviecredits](http://localhost:3000/updatemovies) Download movie credits data from the API.
+* [http://localhost:3000/](http://localhost:3000/) View the data you've already downloaded.
