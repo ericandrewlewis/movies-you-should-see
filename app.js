@@ -8,7 +8,8 @@ var express = require('express'),
 	Backbone = require('backbone'),
 	apiKey = 'b24ecadd649a7322bf03a37e4546aa9f',
 	TMDBAPI = {
-		upcoming: sprintf('http://api.themoviedb.org/3/movie/upcoming?api_key=%s', apiKey)
+		upcoming: sprintf('http://api.themoviedb.org/3/movie/upcoming?api_key=%s', apiKey),
+		movieCredits: sprintf('http://api.themoviedb.org/3/movie/id/credits?api_key=%s', apiKey)
 	};
 
 /**
@@ -16,7 +17,7 @@ var express = require('express'),
  *
  * @fires `mongodb:connected` on the application.
  */
-var initializeMongoConnection = function() {
+var openDBConnection = function() {
 	var url = 'mongodb://localhost:27017/myproject';
 	MongoClient.connect(url, function (err, mongoDB) {
 		assert.equal(null, err);
@@ -73,6 +74,28 @@ var updateUpcomingMoviesFromAPI = function (options) {
 };
 
 /**
+ * For all movies in the db, query the API for credits and update the entry.
+ *
+ * @return {[type]} [description]
+ */
+var updateAllMovieCreditsFromAPI = function() {
+	movies = getMovies();
+	movies.toArray(function(err, movies) {
+	});
+};
+
+/**
+ * Close the db connection
+ * @return {[type]} [description]
+ */
+var closeDBConnection = function() {
+	var db = application.get('db');
+	if ( ! db ) {
+		return;
+	}
+	db.close();
+};
+/**
  * Output all the movies in
  * @return {[type]} [description]
  */
@@ -82,6 +105,8 @@ var getMovies = function () {
 };
 
 var application = new Backbone.Model();
+
+application.on( 'shutdown', closeDBConnection );
 
 app.use( '/application', express.static( './application' ) );
 
@@ -99,13 +124,13 @@ app.get('/', function (request, response) {
 			response.send(movies);
 		});
 	} );
-	initializeMongoConnection();
+	application.trigger('shutdown');
 });
 
 /**
  * Update movies endpoint.
  *
- * Queries the TMDB API for upcoming movies and updates the MongoDB.
+ * Queries the TMDB API for upcoming movies and updates the db.
  *
  * @param  {[type]} request  [description]
  * @param  {[type]} response [description]
@@ -113,7 +138,22 @@ app.get('/', function (request, response) {
  */
 app.get( '/updatemovies', function (request, response) {
 	application.on('mongodb:connected', updateUpcomingMoviesFromAPI );
-	initializeMongoConnection();
+	openDBConnection();
+	response.send('Updated I guess!');
+});
+
+/**
+ * Update movie credits endpoint.
+ *
+ * Queries the TMDB API for each movie's credits and updates the db.
+ *
+ * @param  {[type]} request  [description]
+ * @param  {[type]} response [description]
+ * @return {[type]}          [description]
+ */
+app.get( '/updatemoviecredits', function (request, response) {
+	application.on('mongodb:connected', updateAllMovieCreditsFromAPI );
+	openDBConnection();
 	response.send('Updated I guess!');
 });
 
