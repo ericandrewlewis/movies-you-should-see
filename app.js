@@ -126,6 +126,7 @@ var updateMovieCreditFromAPI = function( movie ) {
  */
 var closeDBConnection = function() {
 	var db = application.get('db');
+	application.off('mongodb:connected');
 	if ( ! db ) {
 		return;
 	}
@@ -159,8 +160,8 @@ app.get('/', function (request, response) {
 	application.on('mongodb:connected', function() {
 		var movies = getMovies();
 		movies.toArray(function(err, movies) {
-			response.end( JSON.stringify(movies) );
 			application.trigger('shutdown');
+			response.end( JSON.stringify(movies) );
 		});
 	} );
 	openDBConnection();
