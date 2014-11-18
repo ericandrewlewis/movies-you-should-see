@@ -7,9 +7,9 @@ var express = require('express'),
 	sprintf = require('sprintf');
 	Backbone = require('backbone'),
 	apiKey = 'b24ecadd649a7322bf03a37e4546aa9f',
-	TMDBAPI = {
+	TMDBAPIendpoints = {
 		upcoming: sprintf('http://api.themoviedb.org/3/movie/upcoming?api_key=%s', apiKey),
-		movieCredits: sprintf('http://api.themoviedb.org/3/movie/id/credits?api_key=%s', apiKey)
+		movieCredits: sprintf('http://api.themoviedb.org/3/movie/{id}/credits?api_key=%s', apiKey)
 	};
 
 /**
@@ -31,9 +31,8 @@ var openDBConnection = function() {
  * Fetch upcoming movies from the TMDB API and store them in mongo.
  */
 var updateUpcomingMoviesFromAPI = function (options) {
-	var body = '',
-		collection = application.get( 'db' ).collection('movies'),
-		endpoint = TMDBAPI.upcoming;
+	var collection = application.get( 'db' ).collection('movies'),
+		endpoint = TMDBAPIendpoints.upcoming;
 
 	options = options || {};
 	options = _.defaults( options, { page: 1 } )
@@ -43,7 +42,7 @@ var updateUpcomingMoviesFromAPI = function (options) {
 		endpoint = endpoint + '&page=' + options.page;
 	}
 	http.get( endpoint, function(response) {
-
+		var body = '';
 		response.on('data', function (chunk) {
 			body += chunk;
 		});
@@ -81,11 +80,48 @@ var updateUpcomingMoviesFromAPI = function (options) {
 var updateAllMovieCreditsFromAPI = function() {
 	movies = getMovies();
 	movies.toArray(function(err, movies) {
+		var wait = 0;
+		_.forEach( movies, function(movie, index, movies) {
+			_.delay( updateMovieCreditFromAPI, wait, movie );
+			wait += 300;
+		});
 	});
 };
 
 /**
- * Close the db connection
+ * Update a movie's credit by requesting data from the API.
+ *
+ * @param  {object} movie A movie object.
+ * @return {[type]}       [description]
+ */
+var updateMovieCreditFromAPI = function( movie ) {
+	var endpoint = TMDBAPIendpoints.movieCredits.replace( '{id}', movie._id );
+	http.get( endpoint, function(response) {
+		var body = '';
+		response.on('data', function (chunk) {
+			body += chunk;
+		});
+		response.on('end', function () {
+			var bodyJSON = JSON.parse( body ),
+				collection = application.get( 'db' ).collection('movies');
+			if ( bodyJSON.cast ) {
+				movie.cast = bodyJSON.cast;
+			}
+			if ( bodyJSON.crew ) {
+				movie.crew = bodyJSON.crew;
+			}
+
+			console.log( sprintf( 'Updating credits for %s', movie.title ) );
+			collection.save(movie, function (err, result) {
+				assert.equal(err, null);
+			});
+		});
+	});
+};
+
+/**
+ * Close the db connection.
+ *
  * @return {[type]} [description]
  */
 var closeDBConnection = function() {
@@ -96,11 +132,12 @@ var closeDBConnection = function() {
 	db.close();
 };
 /**
- * Output all the movies in
+ * Output all the movies in the db.
+ *
  * @return {[type]} [description]
  */
 var getMovies = function () {
-	var collection = application.get( 'db' ).collection('movies');
+	var collection = application.get('db').collection('movies');
 	return collection.find({});
 };
 
@@ -118,13 +155,15 @@ app.use( '/application', express.static( './application' ) );
  * @return {[type]}          [description]
  */
 app.get('/', function (request, response) {
+	console.log( '/ route' );
 	application.on('mongodb:connected', function() {
-		movies = getMovies();
+		var movies = getMovies();
 		movies.toArray(function(err, movies) {
-			response.send(movies);
+			response.end( JSON.stringify(movies) );
+			application.trigger('shutdown');
 		});
 	} );
-	application.trigger('shutdown');
+	openDBConnection();
 });
 
 /**
@@ -137,9 +176,10 @@ app.get('/', function (request, response) {
  * @return {[type]}          [description]
  */
 app.get( '/updatemovies', function (request, response) {
-	application.on('mongodb:connected', updateUpcomingMoviesFromAPI );
+	console.log( '/updatemovies route' );
+	application.on( 'mongodb:connected', updateUpcomingMoviesFromAPI );
 	openDBConnection();
-	response.send('Updated I guess!');
+	response.end('Updated I guess!');
 });
 
 /**
@@ -152,9 +192,10 @@ app.get( '/updatemovies', function (request, response) {
  * @return {[type]}          [description]
  */
 app.get( '/updatemoviecredits', function (request, response) {
+	console.log( '/updatemoviecredits route' );
 	application.on('mongodb:connected', updateAllMovieCreditsFromAPI );
 	openDBConnection();
-	response.send('Updated I guess!');
+	response.end('Updated I guess!');
 });
 
 var server = app.listen(3000, function () {
