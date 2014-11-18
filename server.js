@@ -147,6 +147,7 @@ var application = new Backbone.Model();
 application.on( 'shutdown', closeDBConnection );
 
 app.use( '/application', express.static( './application' ) );
+app.use( '/index', express.static( './index.html' ) );
 
 /**
  * Primary endpoint; lists movies.
@@ -155,7 +156,7 @@ app.use( '/application', express.static( './application' ) );
  * @param  {[type]} response [description]
  * @return {[type]}          [description]
  */
-app.get('/', function (request, response) {
+app.get('/movies', function (request, response) {
 	console.log( '/ route' );
 	application.on('mongodb:connected', function() {
 		var movies = getMovies();
