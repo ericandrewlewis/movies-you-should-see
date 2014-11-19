@@ -9,8 +9,13 @@ var express = require('express'),
 	apiKey = 'b24ecadd649a7322bf03a37e4546aa9f',
 	TMDBAPIendpoints = {
 		upcoming: sprintf('http://api.themoviedb.org/3/movie/upcoming?api_key=%s', apiKey),
-		movieCredits: sprintf('http://api.themoviedb.org/3/movie/{id}/credits?api_key=%s', apiKey)
+		movieCredits: sprintf('http://api.themoviedb.org/3/movie/{id}/credits?api_key=%s', apiKey),
+		configuration: sprintf('http://api.themoviedb.org/3/configuration?api_key=%s', apiKey)
 	};
+
+app.set('view engine', 'html');
+app.set('views', __dirname + '/node_modules/app/templates');
+app.engine( 'html', require( 'hogan-express' ) );
 
 /**
  * Initialize the connection to the Mongodb daemon.
@@ -132,6 +137,7 @@ var closeDBConnection = function() {
 	}
 	db.close();
 };
+
 /**
  * Output all the movies in the db.
  *
@@ -142,22 +148,44 @@ var getMovies = function () {
 	return collection.find({});
 };
 
+/**
+ * Get configuration info to build image URLs.
+ *
+ * @return {[type]} [description]
+ */
+var getTMDBConfigInfo = function () {
+	var collection = application.get('db').collection('config');
+	return collection.find({});
+};
+
 var application = new Backbone.Model();
 
 application.on( 'shutdown', closeDBConnection );
 
 app.use( '/application', express.static( './application' ) );
-app.use( '/index', express.static( './index.html' ) );
+app.use( '/bundle.js', express.static( './bundle.js' ) );
+
+app.get('/index', function (request, response) {
+	console.log( '/index route' );
+	application.on('mongodb:connected', function() {
+		var movies = getTMDBConfigInfo();
+		movies.toArray(function(err, config) {
+			application.trigger('shutdown');
+			response.render( 'page', { movieConfig: JSON.stringify(config[0]) } );
+		});
+	} );
+	openDBConnection();
+});
 
 /**
- * Primary endpoint; lists movies.
+ * JSON endpoint for all movies.
  *
  * @param  {[type]} request  [description]
  * @param  {[type]} response [description]
  * @return {[type]}          [description]
  */
 app.get('/movies', function (request, response) {
-	console.log( '/ route' );
+	console.log( '/movies route' );
 	application.on('mongodb:connected', function() {
 		var movies = getMovies();
 		movies.toArray(function(err, movies) {
@@ -199,6 +227,44 @@ app.get( '/updatemoviecredits', function (request, response) {
 	openDBConnection();
 	response.end('Updated I guess!');
 });
+
+/**
+ * Endpoint handler for updating the image API config info.
+ *
+ * @param  {[type]} request  [description]
+ * @param  {[type]} response [description]
+ * @return {[type]}          [description]
+ */
+app.get( '/updateapiimageconfig', function (request, response) {
+	console.log( '/updateAPIConfig route' );
+	application.on('mongodb:connected', updateAPIConfig );
+	openDBConnection();
+	response.end('Updated image config.');
+});
+
+/**
+ * Update the image API config info.
+ *
+ * @return {[type]} [description]
+ */
+var updateAPIConfig = function() {
+	var endpoint = TMDBAPIendpoints.configuration;
+	http.get( endpoint, function(response) {
+		var body = '';
+		response.on('data', function (chunk) {
+			body += chunk;
+		});
+		response.on('end', function () {
+			var config = JSON.parse( body ),
+				collection = application.get( 'db' ).collection('config');
+			config._id = 'singleton';
+			console.log('Updating API config');
+			collection.save(config, function (err, result) {
+				assert.equal(err, null);
+			});
+		});
+	});
+};
 
 var server = app.listen(3000, function () {
 	var host = server.address().address;
