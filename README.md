@@ -46,4 +46,4 @@ Now you have a few endpoints available in your browser.
 
 * [http://localhost:3000/updatemovies](http://localhost:3000/updatemovies) Download generic movie data from the API.
 * [http://localhost:3000/updatemoviecredits](http://localhost:3000/updatemovies) Download movie credits data from the API.
-* [http://localhost:3000/](http://localhost:3000/) View the data you've already downloaded.
+* [http://localhost:3000/index](http://localhost:3000/index) The front-end.
