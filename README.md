@@ -26,6 +26,16 @@ and store it all in a mongodb instance.
 	```bash
 	mongod --dbpath=data --port 27017
 	```
+* Install browserify, which will be used for compiling JavaScript.
+
+	```bash
+	npm install -g browserify
+	```
+* Compile the front-end JavaScript.
+
+	```bash
+	browserify front-end.js -o bundle.js
+	```
 * In another terminal window at the root of the repo, start the web serving application.
 
 	```bash
