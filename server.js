@@ -163,6 +163,7 @@ var application = new Backbone.Model();
 application.on( 'shutdown', closeDBConnection );
 
 app.use( '/application', express.static( './application' ) );
+app.use( '/static', express.static( './static' ) );
 app.use( '/bundle.js', express.static( './bundle.js' ) );
 
 app.get('/index', function (request, response) {
